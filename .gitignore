@@ -4,7 +4,8 @@
 *.dll
 *.so
 *.dylib
-
+/ec2-recovery-lambda
+/ec2-recovery-lambda.zip
 # Test binary, built with `go test -c`
 *.test
 
