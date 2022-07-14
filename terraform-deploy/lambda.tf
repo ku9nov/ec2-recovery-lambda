@@ -31,9 +31,25 @@ resource "aws_cloudwatch_event_target" "check_go_lambda_every_five_minutes" {
 }
 
 resource "aws_lambda_permission" "allow_cloudwatch_to_call_go_lambda" {
-    statement_id = "AllowExecutionFromCloudWatch"
-    action = "lambda:InvokeFunction"
+    statement_id  = "AllowExecutionFromCloudWatch"
+    action        = "lambda:InvokeFunction"
     function_name = aws_lambda_function.go_lambda.function_name
-    principal = "events.amazonaws.com"
-    source_arn = aws_cloudwatch_event_rule.every_five_minutes.arn
+    principal     = "events.amazonaws.com"
+    source_arn    = aws_cloudwatch_event_rule.every_five_minutes.arn
+}
+
+resource "aws_cloudwatch_metric_alarm" "lambda_alarm" {
+  alarm_name          = "${aws_lambda_function.go_lambda.function_name}_lambda_alarm"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = 1
+  metric_name         = "Errors"
+  namespace           = "AWS/Lambda"
+  period              = 60
+  statistic           = "Sum"
+  threshold           = 0
+  alarm_actions       = try(local.alarm_actions, false) 
+  ok_actions          = try(local.ok_actions, false) 
+  dimensions = {
+    FunctionName = "${aws_lambda_function.go_lambda.function_name}"
+  }
 }
