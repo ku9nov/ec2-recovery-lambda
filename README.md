@@ -30,3 +30,6 @@ SLACK_AUTH_TOKEN=your_auth_token_here
 SLACK_CHANNEL_ID=ec2-recovery-lambda
 ```
 Then click on `Save`.
+
+### Deploy
+You can use `terraform` for deploying this `Lambda` function. All configuration files you can find in `terraform-deploy` folder.
