@@ -2,6 +2,7 @@ package actions
 
 import (
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/slack-go/slack"
@@ -14,7 +15,7 @@ const (
 	RedColor       string = "#FF0000"
 )
 
-func SendMessageToSlack(text, color, instanceID string) {
+func SendMessageToSlack(text, color, instanceID string, instanceCount int) {
 	if os.Getenv("SLACK_ENABLE") == "true" {
 		token := os.Getenv("SLACK_AUTH_TOKEN")
 		channelID := os.Getenv("SLACK_CHANNEL_ID")
@@ -27,10 +28,17 @@ func SendMessageToSlack(text, color, instanceID string) {
 				{
 					Title: "Host",
 					Value: instanceID,
+					Short: true,
+				},
+				{
+					Title: "Total number of instances",
+					Value: strconv.Itoa(instanceCount),
+					Short: true,
 				},
 				{
 					Title: "Event time",
 					Value: time.Now().Format("2006.01.02 15:04:05"),
+					Short: true,
 				},
 			},
 		}
