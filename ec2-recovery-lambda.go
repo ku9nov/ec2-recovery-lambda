@@ -37,12 +37,13 @@ func checkInstances() {
 		log.Println(err)
 		return
 	}
-	log.Println("Count of running instances: ", len(result.InstanceStatuses))
+	instanceCount := len(result.InstanceStatuses)
+	log.Println("Count of running instances: ", instanceCount)
 	for _, r := range result.InstanceStatuses {
 		if r.InstanceStatus.Status == "impaired" || r.SystemStatus.Status == "impaired" {
 			log.Println(actions.AlarmMessage, *r.InstanceId)
-			actions.SendMessageToSlack(actions.AlarmMessage, actions.RedColor, *r.InstanceId)
-			actions.StopInstanceCmd(r.InstanceId)
+			actions.SendMessageToSlack(actions.AlarmMessage, actions.RedColor, *r.InstanceId, instanceCount)
+			actions.StopInstanceCmd(r.InstanceId, instanceCount)
 		}
 	}
 }
