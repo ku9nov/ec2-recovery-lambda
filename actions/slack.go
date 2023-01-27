@@ -15,11 +15,18 @@ const (
 	RedColor       string = "#FF0000"
 )
 
-func SendMessageToSlack(text, color, instanceID string, instanceCount int) {
+func SendMessageToSlack(text, color, instanceName, instanceID string, instanceCount int) {
+	var instanceValue string
 	if os.Getenv("SLACK_ENABLE") == "true" {
 		token := os.Getenv("SLACK_AUTH_TOKEN")
 		channelID := os.Getenv("SLACK_CHANNEL_ID")
 		client := slack.New(token, slack.OptionDebug(true))
+		switch instanceName {
+		case "":
+			instanceValue = instanceID
+		default:
+			instanceValue = instanceName
+		}
 		attachment := slack.Attachment{
 			Title: "EC2 recovery Lambda Notification",
 			Text:  text,
@@ -27,7 +34,7 @@ func SendMessageToSlack(text, color, instanceID string, instanceCount int) {
 			Fields: []slack.AttachmentField{
 				{
 					Title: "Host",
-					Value: instanceID,
+					Value: instanceValue,
 					Short: true,
 				},
 				{
