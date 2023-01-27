@@ -6,6 +6,15 @@ If AWS EC2 instance fails validation and the check status is in the error state,
 go build ec2-recovery-lambda.go
 zip ec2-recovery-lambda.zip ec2-recovery-lambda
 ```
+Note: Instead of the build command, you can use this command:
+
+`CGO_ENABLED=0 go build ec2-recovery-lambda.go`
+
+If AWS Lambda returns you the following error:
+
+`/var/task/ec2-recovery-lambda: /lib64/libc.so.6: version 'GLIBC_2.34' not found (required by /var/task/ec2-recovery-lambda)`
+
+This error occurs because the version of glibc library on the AWS Lambda environment is older than the version required by the Go binary. By setting CGO_ENABLED to 0, it will disable the cgo, which will use the glibc from the host machine instead of the one from the container.
 # Enable Slack Notification
 ### Create Slack Bot
 The first thing we need to do is to create the Slack application. Visit the [slack website](https://api.slack.com/apps?new_app=1) to create the application. Select the `From scratch` option. 

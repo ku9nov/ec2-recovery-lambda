@@ -7,6 +7,7 @@ import (
 	"ec2-recovery-lambda/actions"
 
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 )
@@ -19,6 +20,36 @@ type EC2DescribeInstanceStatusAPI interface {
 
 func GetInstances(c context.Context, api EC2DescribeInstanceStatusAPI, input *ec2.DescribeInstanceStatusInput) (*ec2.DescribeInstanceStatusOutput, error) {
 	return api.DescribeInstanceStatus(c, input)
+}
+
+func getInstanceName(instanceID string, cfg aws.Config) (instanceNameById string) {
+
+	ec2Svc := ec2.NewFromConfig(cfg)
+
+	input := &ec2.DescribeInstancesInput{
+		InstanceIds: []string{instanceID},
+	}
+
+	result, err := ec2Svc.DescribeInstances(context.Background(), input)
+	if err != nil {
+		log.Println("Error", err)
+		return
+	}
+
+	// Get the instance name
+	instanceName := ""
+	for _, reservation := range result.Reservations {
+		for _, instance := range reservation.Instances {
+			for _, tag := range instance.Tags {
+				if *tag.Key == "Name" {
+					instanceName = *tag.Value
+					break
+				}
+			}
+		}
+	}
+	log.Println("Instance Name:", instanceName)
+	return instanceName
 }
 
 func checkInstances() {
@@ -42,8 +73,9 @@ func checkInstances() {
 	for _, r := range result.InstanceStatuses {
 		if r.InstanceStatus.Status == "impaired" || r.SystemStatus.Status == "impaired" {
 			log.Println(actions.AlarmMessage, *r.InstanceId)
-			actions.SendMessageToSlack(actions.AlarmMessage, actions.RedColor, *r.InstanceId, instanceCount)
-			actions.StopInstanceCmd(r.InstanceId, instanceCount)
+			nameOfImpairedInstance := getInstanceName(*r.InstanceId, cfg)
+			actions.SendMessageToSlack(actions.AlarmMessage, actions.RedColor, nameOfImpairedInstance, *r.InstanceId, instanceCount)
+			actions.StopInstanceCmd(r.InstanceId, instanceCount, nameOfImpairedInstance)
 		}
 	}
 }
