@@ -30,7 +30,7 @@ func StartInstance(c context.Context, api EC2StartInstancesAPI, input *ec2.Start
 	return resp, err
 }
 
-func StartInstanceCmd(instanceID *string, instanceCount int) {
+func StartInstanceCmd(instanceID *string, instanceCount int, instanceName string) {
 
 	cfg, err := config.LoadDefaultConfig(context.TODO())
 	if err != nil {
@@ -52,6 +52,6 @@ func StartInstanceCmd(instanceID *string, instanceCount int) {
 		log.Println(err)
 		return
 	}
-	SendMessageToSlack(RestartMessage, GreenColor, *instanceID, instanceCount)
+	SendMessageToSlack(RestartMessage, GreenColor, instanceName, *instanceID, instanceCount)
 	log.Println(RestartMessage, *instanceID)
 }

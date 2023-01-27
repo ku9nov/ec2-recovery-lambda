@@ -37,7 +37,7 @@ func StopInstance(c context.Context, api EC2StopInstancesAPI, input *ec2.StopIns
 	return resp, err
 }
 
-func StopInstanceCmd(instanceID *string, instanceCount int) {
+func StopInstanceCmd(instanceID *string, instanceCount int, instanceName string) {
 	cfg, err := config.LoadDefaultConfig(context.TODO())
 	if err != nil {
 		panic("Configuration error, " + err.Error())
@@ -73,7 +73,7 @@ func StopInstanceCmd(instanceID *string, instanceCount int) {
 	} else {
 		_ = out
 		log.Println("Successfully stopped instance with ID " + *instanceID)
-		StartInstanceCmd(instanceID, instanceCount)
+		StartInstanceCmd(instanceID, instanceCount, instanceName)
 	}
 
 }
